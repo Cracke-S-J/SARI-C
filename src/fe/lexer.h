@@ -1,5 +1,6 @@
 // Copyright (c) ssj. All rights reserved.
 
+#pragma once
 
 #include "symbol.h"
 #include "token.h"
@@ -12,12 +13,12 @@ std::string VERSION = "1.0";
 
 class Lexer {
 private:
-    int line = 1;
+    static int line;
     std::fstream &stream_plain;
     std::map<std::string, Word*> words;
     char peek = ' ';
     void reserve(Word* word) {
-        this->words.insert(std::map<std::string, Word*>::value_type(word->lexeme, word));
+        this->words.insert(std::map<std::string, Word*>::value_type(word->getLexeme(), word));
     }
     void readch() {
         stream_plain.get(this->peek);
@@ -53,9 +54,15 @@ public:
         this->reserve((Word*)new Word("float", Tags::BASIC));
         this->reserve((Word*)new Word("bool",  Tags::BASIC));
     }
+    ~Lexer() {
+        // 把 words delete 了.
+    }
 
-    // TODO, 不会写这返回值不定的，设计不妙.
-    Word* scan() {
+    int getLine() const{
+        return this->line;
+    }
+
+    void* scan() {
         while(true) {
             if (this->peek == ' ' || this->peek == '\t')
                 ;
@@ -67,17 +74,17 @@ public:
         }
         switch (this->peek) {
         case '&':
-            return this->gen_token('&', Words::aNd);
+            return this->gen_token('&', Words.and);
         case '|':
-            return this->gen_token('&', Words::oR);
+            return this->gen_token('|', Words.or);
         case '=':
-            return this->gen_token('&', Words::eq);
+            return this->gen_token('=', Words.eq);
         case '!':
-            return this->gen_token('&', Words::eq);
+            return this->gen_token('!', Words.eq);
         case '<':
-            return this->gen_token('&', Words::eq);
+            return this->gen_token('<', Words.eq);
         case '>':
-            return this->gen_token('&', Words::eq);
+            return this->gen_token('>', Words.eq);
         default:
             break;
         }
@@ -88,7 +95,7 @@ public:
                 this->readch();
             }
             if (this->peek != '.') {
-                return Number(tv);
+                return (Number*)new Number(tv);
             }
             readch();
             float ftv = (float)tv;
@@ -98,12 +105,12 @@ public:
                 dv *= 10;
                 this->readch();
             }
-            return Real(ftv);
+            return (Real*)new Real(ftv);
         }
         if (isalpha(this->peek)) {
             std::string lexeme = "";
             while (isalpha(this->peek) || isdigit(this->peek)) {
-                lexeme.append(this->peek);
+                lexeme += this->peek;
                 readch();
             }
             auto iter = this->words.find(lexeme);
@@ -117,6 +124,5 @@ public:
         Token* token = new Token(this->peek);
         this->peek = ' ';
         return token;
-    }    
-
+    }
 };

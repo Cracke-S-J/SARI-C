@@ -1,9 +1,11 @@
 // Copyright (c) ssj. All rights reserved.
 
+#pragma once
 
 #include <string>
 #include <iterator>
 #include <map>
+
 #include "token.h"
 
 
@@ -15,6 +17,7 @@ public:
     Environ() {
         this->prev = nullptr;
     }
+    ~Environ() {}
     void insert(std::string w, std::string i) {
         // ???
         table.insert(std::map<std::string, std::string>::value_type(w, i));
@@ -36,41 +39,51 @@ class Type : public Word {
 protected:
     int width;
 public:
-    Type() {
-        width = 0;
+    Type() : width(0) {}
+    ~Type(){}
+    Type(std::string str, int tag, int width) : width(width), Word(str, tag) {}
+    
+    int getWidth() const{
+        return width;
     }
-    Type(std::string str, int tag, int width) : Word(str, tag) {
-        this->width = width;
+
+    bool isChar() {
+        return !this->toString().compare("char");
     }
-    bool operator==(const Type& a) {
-        return true;
-        return this->width == a.width && !this->toString().compare(a.toString());
+    bool isInt() {
+        return !this->toString().compare("int");
     }
-    static bool numeric(Type &t) {
-        if (!t.toString().compare("char") || 
-            !t.toString().compare("int")  || 
-            !t.toString().compare("floot")) {
-            return true;
-        }
-        else {
-            return false;
-        }
+    bool isFloat() {
+        return !this->toString().compare("float");
+    }
+    bool isBool() {
+        return !this->toString().compare("bool");
+    }
+
+    static bool numeric(Type t) {
+        return t.isBool()? false : true;
     }
 
     static Type max(Type &a, Type &b) {
         if (!Type::numeric(a) || !Type::numeric(b)) {
             return Type();
         }
-        if (!a.toString().compare("floot") || 
-            !b.toString().compare("floot")) {
-            return a.toString().compare("floot")?b:a;
+        if (a.isFloat() || b.isFloat()) {
+            return a.isFloat()?a:b;
         }
-        if (!a.toString().compare("int") || 
-            !b.toString().compare("int")) {
-            return a.toString().compare("int")?b:a;
+        if (a.isInt() || b.isInt()) {
+            return a.isInt()?a:b;
         }
         return a;
     }
+};
+
+class Types{
+public:
+    Type Char  = Type("char", Tags::BASIC, 1);
+    Type Bool  = Type("bool", Tags::BASIC, 1);
+    Type Int   = Type("int",  Tags::BASIC, 4);
+    Type Float = Type("float", Tags::BASIC, 8);
 };
 
 class Array : public Type {
@@ -79,6 +92,7 @@ private:
     Array* of;
 public:
     Array(){}
+    ~Array(){}
     Array(int size, Array* pre) : Type("[]", Tags::INDEX, size*pre->width) {
         this->size = size;
         this->of = pre;

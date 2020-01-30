@@ -1,5 +1,6 @@
 // Copyright (c) ssj. All rights reserved.
 
+#pragma once
 
 #include<string>
 
@@ -32,8 +33,12 @@ private:
     int tag;
 public:
     Token(){}
+    ~Token(){}
     Token(const int tag) {
         this->tag = tag;
+    }
+    int getTag() const{
+        return this->tag;
     }
     std::string toString() const{
         return std::to_string(this->tag);
@@ -45,8 +50,12 @@ private:
     int value;
 public:
     Number(){}
+    ~Number(){}
     Number(int value) : Token(Tags::NUM) {
         this->value = value;
+    }
+    int getNumber() const{
+        return this->value;
     }
     std::string toString() const{
         return std::to_string(this->value);
@@ -58,8 +67,12 @@ private:
     int value;
 public:
     Real(){}
+    ~Real(){}
     Real(int value) : Token(Tags::REAL) {
         this->value = value;
+    }
+    int getNumber() const{
+        return this->value;
     }
     std::string toString() const{
         return std::to_string(this->value);
@@ -67,28 +80,32 @@ public:
 };
 
 class Word : public Token {
-public:
+private:
     std::string lexeme;
-    
+public:
     Word(){}
+    ~Word(){}
     Word(std::string lexeme, int tag) : Token(tag) {
         this->lexeme = lexeme;
+    }
+    std::string getLexeme() const{
+        return this->lexeme;
     }
     std::string toString() const{
         return this->lexeme;
     }
 };
 
-class Words{
+class WORDS{
 public:
-    Word aNd = Word("&&", Tags::AND);
-    Word oR = Word("||", Tags::OR);
-    Word eq = Word("==", Tags::EQ);
-    Word ne = Word("!=", Tags::NE);
-    Word le = Word("<=", Tags::LE);
-    Word ge = Word(">=", Tags::GE);
-    Word minus = Word("minus", Tags::MINUS);
-    Word tRuE = Word("true", Tags::TRUE);
-    Word fAlSe = Word("false", Tags::FALSE);
-    Word temp = Word("t", Tags::TEMP);
-};
+    Word* and   = new Word("&&", Tags::AND);
+    Word* or    = new Word("||", Tags::OR);
+    Word* eq    = new Word("==", Tags::EQ);
+    Word* ne    = new Word("!=", Tags::NE);
+    Word* le    = new Word("<=", Tags::LE);
+    Word* ge    = new Word(">=", Tags::GE);
+    Word* minus = new Word("minus", Tags::MINUS);
+    Word* tRuE  = new Word("true", Tags::TRUE);
+    Word* fAlSe = new Word("false", Tags::FALSE);
+    Word* temp  = new Word("t", Tags::TEMP);
+}Words;
