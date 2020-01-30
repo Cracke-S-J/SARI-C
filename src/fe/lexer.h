@@ -13,7 +13,7 @@ std::string VERSION = "1.0";
 
 class Lexer {
 private:
-    static int line;
+    int line;
     std::fstream &stream_plain;
     std::map<std::string, Word*> words;
     char peek = ' ';
@@ -31,17 +31,17 @@ private:
         this->peek = ' ';
         return true;
     }
-    Word* gen_token(char ch, Word* word) {
+    void* gen_token(char ch, Word* word) {
         if (this->match(ch)) {
             return word;
         }
         else {
-            return (Word*)new Word("", ch);
+            return (Token*)new Token(ch);
         }
     }
 
 public:
-    Lexer(std::fstream &in_) : stream_plain(in_) {
+    Lexer(std::fstream &in_) : stream_plain(in_), line(0) {
         this->reserve((Word*)new Word("if",    Tags::IF));
         this->reserve((Word*)new Word("else",  Tags::ELSE));
         this->reserve((Word*)new Word("while", Tags::WHILE));
@@ -55,7 +55,9 @@ public:
         this->reserve((Word*)new Word("bool",  Tags::BASIC));
     }
     ~Lexer() {
-        // 把 words delete 了.
+        for(auto iter : this->words) {
+            delete(iter.second);
+        }
     }
 
     int getLine() const{
@@ -99,10 +101,10 @@ public:
             }
             readch();
             float ftv = (float)tv;
-            int dv = 10;
+            float dv = 10.0;
             while (isdigit(this->peek)) {
                 ftv += (this->peek - '0') / dv;
-                dv *= 10;
+                dv *= 10.0;
                 this->readch();
             }
             return (Real*)new Real(ftv);

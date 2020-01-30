@@ -16,5 +16,7 @@ set(CMAKE_BUILD_TYPE "Debug")
 # add_subdirectory(be)
 # add_subdirectory(test)
 # add_subdirectory(utils)
+
 include_directories(fe be test utils)
-add_executable(Sari-C ${CMAKE_SOURCE_DIR}/test/testlex.cpp)
+add_executable(TestLex ${CMAKE_SOURCE_DIR}/test/testlex.cpp)
+add_executable(Sari-C ${CMAKE_SOURCE_DIR}/sari.cpp)

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include<string>
+#include <string>
 
 class Tags {
 public:
@@ -64,14 +64,14 @@ public:
 
 class Real : public Token {
 private:
-    int value;
+    float value;
 public:
     Real(){}
     ~Real(){}
-    Real(int value) : Token(Tags::REAL) {
+    Real(float value) : Token(Tags::REAL) {
         this->value = value;
     }
-    int getNumber() const{
+    float getNumber() const{
         return this->value;
     }
     std::string toString() const{
