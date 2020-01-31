@@ -105,7 +105,7 @@ public:
     Word* le    = new Word("<=", Tags::LE);
     Word* ge    = new Word(">=", Tags::GE);
     Word* minus = new Word("minus", Tags::MINUS);
-    Word* tRuE  = new Word("true", Tags::TRUE);
-    Word* fAlSe = new Word("false", Tags::FALSE);
+    Word* True  = new Word("true", Tags::TRUE);
+    Word* False = new Word("false", Tags::FALSE);
     Word* temp  = new Word("t", Tags::TEMP);
 }Words;

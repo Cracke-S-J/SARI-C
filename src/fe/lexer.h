@@ -13,7 +13,6 @@ std::string VERSION = "1.0";
 
 class Lexer {
 private:
-    int line;
     std::fstream &stream_plain;
     std::map<std::string, Word*> words;
     char peek = ' ';
@@ -41,7 +40,8 @@ private:
     }
 
 public:
-    Lexer(std::fstream &in_) : stream_plain(in_), line(0) {
+    static int line;
+    Lexer(std::fstream &in_) : stream_plain(in_) {
         this->reserve((Word*)new Word("if",    Tags::IF));
         this->reserve((Word*)new Word("else",  Tags::ELSE));
         this->reserve((Word*)new Word("while", Tags::WHILE));
@@ -60,16 +60,12 @@ public:
         }
     }
 
-    int getLine() const{
-        return this->line;
-    }
-
     void* scan() {
         while(true) {
             if (this->peek == ' ' || this->peek == '\t')
                 ;
             else if (this->peek == '\n')
-                this->line++;
+                line++;
             else
                 break;
             this->readch();
@@ -128,3 +124,5 @@ public:
         return token;
     }
 };
+
+int Lexer::line = 0;

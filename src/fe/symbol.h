@@ -2,33 +2,39 @@
 
 #pragma once
 
+#define TODO 0
+
 #include <string>
 #include <iterator>
 #include <map>
 
 #include "token.h"
+#include "inter.h"
 
 
 class Environ {
 private:
-    std::map<std::string, std::string> table;
+    std::map<Token*, Id*> table;
     Environ* prev;
 public:
     Environ() {
         this->prev = nullptr;
     }
+    Environ(Environ* pre) :prev(pre) {}
     ~Environ() {}
-    void insert(std::string w, std::string i) {
+    void insert(Token* w, Id* i) {
         // ???
-        table.insert(std::map<std::string, std::string>::value_type(w, i));
+        table.insert(std::map<Token*, Id*>::value_type(w, i));
     }
     std::string get(std::string w) {
         Environ* tmp = this;
         while (tmp) {
+            # if TODO
             auto iter = tmp->table.find(w);
             if (iter != tmp->table.end()) {
                 return iter->second;
             }
+            # endif
             tmp = tmp->prev;
         }
         return nullptr;
@@ -60,31 +66,31 @@ public:
         return !this->toString().compare("bool");
     }
 
-    static bool numeric(Type t) {
-        return t.isBool()? false : true;
+    static bool numeric(Type* t) {
+        return t->isBool()? false : true;
     }
 
-    static Type max(Type &a, Type &b) {
+    static Type* max(Type* a, Type* b) {
         if (!Type::numeric(a) || !Type::numeric(b)) {
-            return Type();
+            return nullptr;
         }
-        if (a.isFloat() || b.isFloat()) {
-            return a.isFloat()?a:b;
+        if (a->isFloat() || b->isFloat()) {
+            return a->isFloat() ? a : b;
         }
-        if (a.isInt() || b.isInt()) {
-            return a.isInt()?a:b;
+        if (a->isInt() || b->isInt()) {
+            return a->isInt() ? a : b;
         }
         return a;
     }
 };
 
-class Types{
+class TYPES {
 public:
-    Type Char  = Type("char", Tags::BASIC, 1);
-    Type Bool  = Type("bool", Tags::BASIC, 1);
-    Type Int   = Type("int",  Tags::BASIC, 4);
-    Type Float = Type("float", Tags::BASIC, 8);
-};
+    Type* Char  = new Type("char", Tags::BASIC, 1);
+    Type* Bool  = new Type("bool", Tags::BASIC, 1);
+    Type* Int   = new Type("int",  Tags::BASIC, 4);
+    Type* Float = new Type("float", Tags::BASIC, 8);
+}Types;
 
 class Array : public Type {
 private:
