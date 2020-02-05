@@ -1,5 +1,6 @@
 // Copyright (c) ssj. All rights reserved.
 
+#pragma once
 
 #include "lexer.h"
 #include "symbol.h"
@@ -7,6 +8,7 @@
 #include "op.h"
 #include "logic.h"
 #include "stmt.h"
+#include "log.h"
 
 #include <iostream>
 #include <string>
@@ -19,71 +21,35 @@ private:
     Token* look;
     void move() {
         look = (Token*)lex->scan();
+        log_msg("look->tag = " + 
+                std::to_string(look->getTag()));
     }
     void error(std::string str) {
         std::cout << "near line " << std::to_string(lex->line) \
-                    << ": " << str << std::endl;
+                  << ": " << str << std::endl;
     }
     void match(int t) {
-        if (this->look->getTag() == t) {
+        if(this->look->getTag() == t) {
             this->move();
         }
-        else{
+        else {
             this->error("syntax error");
         }
     }
-    Array* _type() {
-        Array* tmp = (Array*)this->look;
-        this->match(Tags::BASIC);
-        if (this->look->getTag() != (int)"[") {
-            return tmp;
-        }
-        else {
-            return this->dims(tmp);
-        }
-    }
-    Array* dims(Array* arr) {
-        this->match((int)"[");
-        Number* tmp = (Number*)this->look;
-        this->match(Tags::NUM);
-        this->match((int)"]");
-        if (this->look->getTag() == (int)"[") {
-            return this->dims(arr);
-        }
-        else {
-            return new Array(tmp->getNumber(), arr);
-        }
-    }
-    Stmt* block(){
-        this->match((int)"{");
-        Environ* savedEnv = this->top;
-        this->top = new Environ(this->top);
-        this->decls();
-        Stmt* s = this->stmts();
-        this->match((int)"}");
-        this->top = savedEnv;
-    }
-    void decls(){
-        while(this->look->getTag() == Tags::BASIC) {
-            Array* p = this->_type();
-            Token* tok = this->look;
-            this->match(Tags::ID);
-            this->match((int)";");
-            Id* _id = new Id((Word*)tok, p, this->used);
-            this->top->insert(tok, _id);
-            this->used = this->used + p->getWidth();
-        }
-    }
+    Node* _type();
+    Array* dims(Array*);
+    Seq* block();
+    void decls();
     Seq* stmts();
-    Stmt* stmt();
-    Stmt* assign();
+    void* stmt();
+    Set* assign();
     Node* _bool();
     Node* join();
     Node* equality();
     Node* rel();
     Arith* expr();
     Arith* term();
-    Logical* unary();
+    Expr* unary();
     Node* factor();
     Access* offset(Id*);
 
@@ -92,6 +58,9 @@ public:
     Parser(Lexer* lexer) : lex(lexer), used(0), top(nullptr) {
         this->move();
     }
-    ~Parser(){}
+    ~Parser(){
+        #if TODO
+        #endif
+    }
     void program();
 };

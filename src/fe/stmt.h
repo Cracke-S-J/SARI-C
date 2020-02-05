@@ -5,16 +5,13 @@
 #include "inter.h"
 #include "op.h"
 
+// extern STMTS Stmts;
+
 class Break : public Stmt {
 private:
     Stmt* stmt;
 public:
-    Break() {
-        if (Stmts.Enclosing == nullptr) {
-            this->error("unenclosed bread");
-        }
-        this->stmt = Stmts.Enclosing;
-    }
+    Break();
     ~Break(){}
     void gen(int b, int a) {
         this->emit("goto L" + std::to_string(this->stmt->getAfter()));
@@ -79,6 +76,13 @@ public:
             this->expr->error("boolean required in do");
         }
     }
+    void init(Expr* x, Stmt* s) {
+        expr = x;
+        stmt = s;
+        if (!this->expr->getType()->toString().compare("bool")) {
+            this->expr->error("boolean required in do");
+        }
+    }
     void gen(int b, int a) {
         this->setAfter(a);
         int label = this->newlable();
@@ -100,6 +104,13 @@ public:
             this->expr->error("boolean required in do");
         }
     }
+    void init(Expr* x, Stmt* s) {
+        expr = x;
+        stmt = s;
+        if (!this->expr->getType()->toString().compare("bool")) {
+            this->expr->error("boolean required in do");
+        }
+    }
     void gen(int b, int a) {
         this->setAfter(a);
         this->expr->jumping(0, a);
@@ -107,30 +118,6 @@ public:
         this->emitlabel(label);
         this->stmt->gen(label, a);
         this->emit("goto L" + std::to_string(b));
-    }
-};
-
-class Seq : public Stmt {
-private:
-    Stmt* stmt1;
-    Stmt* stmt2;
-public:
-    Seq(){}
-    ~Seq(){}
-    Seq(Stmt* s1, Stmt* s2) : stmt1(s1), stmt2(s2) {}
-    void gen(int b, int a) {
-        if (stmt1 == Stmts.Null) {
-            stmt2->gen(b, a);
-        }
-        else if(stmt2 == Stmts.Null) {
-            stmt1->gen(b, a);
-        }
-        else {
-            int label = this->newlable();
-            this->stmt1->gen(b, label);
-            this->emitlabel(label);
-            this->stmt2->gen(label, a);
-        }
     }
 };
 
@@ -159,6 +146,8 @@ public:
         }
     }
     void gen(int b, int a) {
+        log_msg(this->id->toString());
+        log_msg(this->expr->gen()->toString());
         this->emit(this->id->toString() + " = " + this->expr->gen()->toString());
     }
 };
@@ -192,4 +181,18 @@ public:
         std::string str2 = this->expr->reduce()->toString();
         this->emit(this->array->toString() + "[" + str1 + "] = " + str2);
     }
+};
+
+class Seq : public Stmt {
+private:
+    Stmt* stmt1;
+    Stmt* stmt2;
+    Set*  set;
+    // Seq
+public:
+    Seq(){}
+    ~Seq(){}
+    Seq(Stmt* s1, Stmt* s2) : stmt1(s1), stmt2(s2), set(nullptr) {}
+    Seq(Stmt* s1, Set* s2) : stmt1(s1), set(s2), stmt2(nullptr) {}
+    void gen(int b, int a);
 };

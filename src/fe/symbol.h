@@ -9,12 +9,11 @@
 #include <map>
 
 #include "token.h"
-#include "inter.h"
 
 
 class Environ {
 private:
-    std::map<Token*, Id*> table;
+    std::map<Token*, void*> table;
     Environ* prev;
 public:
     Environ() {
@@ -22,19 +21,16 @@ public:
     }
     Environ(Environ* pre) :prev(pre) {}
     ~Environ() {}
-    void insert(Token* w, Id* i) {
-        // ???
-        table.insert(std::map<Token*, Id*>::value_type(w, i));
+    void insert(Token* w, void* i) {
+        table.insert(std::map<Token*, void*>::value_type(w, i));
     }
-    std::string get(std::string w) {
+    void* get(Token* w) {
         Environ* tmp = this;
         while (tmp) {
-            # if TODO
             auto iter = tmp->table.find(w);
             if (iter != tmp->table.end()) {
                 return iter->second;
             }
-            # endif
             tmp = tmp->prev;
         }
         return nullptr;
@@ -90,7 +86,7 @@ public:
     Type* Bool  = new Type("bool", Tags::BASIC, 1);
     Type* Int   = new Type("int",  Tags::BASIC, 4);
     Type* Float = new Type("float", Tags::BASIC, 8);
-}Types;
+};
 
 class Array : public Type {
 private:
@@ -108,5 +104,8 @@ public:
         str.append(std::to_string(this->size));
         str.append("]");
         return str + of->toString();
+    }
+    Array* getOf() const{
+        return of;
     }
 };

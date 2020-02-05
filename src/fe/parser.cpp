@@ -3,25 +3,155 @@
 #define TODO 0
 
 #include "parser.h"
+#include "inter.h"
+#include "log.h"
+
+Seq* Parser::block() {
+    log_msg("block start.");
+    this->match('{');
+    Environ* savedEnv = this->top;
+    this->top = new Environ(this->top);
+    this->decls();
+    Seq* s = this->stmts();
+    // this->match('}');
+    this->top = savedEnv;
+    log_msg("block finish.");
+    return s;
+}
+void Parser::decls() {
+    log_msg("decl start.");
+    while(this->look->getTag() == Tags::BASIC) {
+        Array* p = (Array*)this->_type();
+        Token* tok = this->look;
+        this->match(Tags::ID);
+        this->match(';');
+        Id* _id = new Id((Word*)tok, p, this->used);
+        this->top->insert(tok, _id);
+        this->used = this->used + p->getWidth();
+    }
+    log_msg("decl finish.");
+    return;
+}
+
+Node* Parser::_type() {
+    Array* tmp = (Array*)this->look;
+    this->match(Tags::BASIC);
+    if (this->look->getTag() != '[') {
+        return (Node*)tmp;
+    }
+    else {
+        return (Node*)this->dims(tmp);
+    }
+}
+Array* Parser::dims(Array* arr) {
+    this->match('[');
+    Number* tmp = (Number*)this->look;
+    this->match(Tags::NUM);
+    this->match(']');
+    if (this->look->getTag() == '[') {
+        return this->dims(arr);
+    }
+    else {
+        return new Array(tmp->getNumber(), arr);
+    }
+}
 
 Seq* Parser::stmts() {
-    if (this->look->getTag() == (int)"}") {
+    log_msg("stmts start.");
+    if (this->look->getTag() == '}') {
+        log_msg("stmts end.");
         return (Seq*)Stmts.Null;
     }
     else {
-        return new Seq(this->stmt(), this->stmts());
+        return new Seq((Stmt*)this->stmts(), (Set*)this->stmt());
     }
 }
 
-Stmt* Parser::stmt() {
-
+void* Parser::stmt() {
+    Stmt* saveStmt = nullptr;
+    if (this->look->getTag() == ';') {
+        this->move();
+        return (Stmt*)Stmts.Null;
+    }
+    else if (this->look->getTag() == Tags::IF) {
+        this->match(Tags::IF);
+        this->match('(');
+        Expr* x = (Expr*)this->_bool();
+        this->match(')');
+        Stmt* s1 = (Stmt*)this->stmt();
+        if (this->look->getTag() != Tags::ELSE) {
+            return new If(x, s1);
+        }
+        this->match(Tags::ELSE);
+        Stmt* s2 = (Stmt*)this->stmt();
+        return new Else(x, s1, s2);
+    }
+    else if (this->look->getTag() == Tags::WHILE) {
+        While* whilenode = new While();
+        Stmt* saveStmt = (Stmt*)Stmts.Enclosing;
+        Stmts.Enclosing = (Stmt*)whilenode;
+        this->match(Tags::WHILE);
+        this->match('(');
+        Node* x = this->_bool();
+        this->match(')');
+        Stmt* s1 = (Stmt*)this->stmt();
+        whilenode->init((Expr*)x, s1);
+        Stmts.Enclosing = saveStmt;
+        return whilenode;
+    }
+    else if(this->look->getTag() == Tags::DO) {
+        Do* donode = new Do();
+        Stmt* savedStmt = Stmts.Enclosing;
+        Stmts.Enclosing = donode;
+        this->match(Tags::DO);
+        Stmt* s1 = (Stmt*)this->stmt();
+        this->match(Tags::WHILE);
+        this->match('(');
+        Expr* x = (Expr*)this->_bool();
+        this->match(')');
+        this->match(';');
+        donode->init(x, s1);
+        Stmts.Enclosing = savedStmt;
+        return donode;
+    }
+    else if(this->look->getTag() == Tags::BREAK) {
+        this->match(Tags::BREAK);
+        this->match(';');
+        return new Break();
+    }
+    else if(this->look->getTag() == '{') {
+        return this->block();
+    }
+    else {
+        return this->assign();
+    }
 }
 
-Stmt* Parser::assign() {
-
+Set* Parser::assign() {
+    log_msg("assign start.");
+    Token* t = this->look;
+    this->match(Tags::ID);
+    Id* id = (Id*)this->top->get(t);
+    log_msg("assign id: " + id->toString());
+    if(id == nullptr) {
+        this->error(t->toString() + " undeclared.");
+    }
+    Set* set;
+    if(this->look->getTag() == '=') {
+        this->move();
+        set = new Set(id, (Expr*)this->_bool());
+    }
+    else {
+        Access* x = this->offset(id);
+        this->match('=');
+        set = (Set*)new SetElem(x, (Expr*)this->_bool());
+    }
+    this->match(';');
+    log_msg("assign end.");
+    return set;
 }
 Node* Parser::_bool() {
-    Node* x = this->equality();
+    Node* x = this->join();
     while (this->look->getTag() == Tags::OR) {
         Token* tok = this->look;
         this->move();
@@ -50,10 +180,10 @@ Node* Parser::equality() {
 }
 Node* Parser::rel() {
     Arith* x = this->expr();
-    if (this->look->getTag() == (int)"<" ||
+    if (this->look->getTag() == '<' ||
         this->look->getTag() == Tags::LE ||
         this->look->getTag() == Tags::GE ||
-        this->look->getTag() == (int)">") {
+        this->look->getTag() == '>') {
         Token* tok = this->look;
         this->move();
         return new Rel((Word*)tok, x, this->expr());
@@ -62,8 +192,8 @@ Node* Parser::rel() {
 }
 Arith* Parser::expr() {
     Arith* arith = (Arith*)this->term();
-    while (this->look->getTag() == (int)"+" || 
-            this->look->getTag() == (int)"-") {
+    while (this->look->getTag() == '+' || 
+           this->look->getTag() == '-') {
         Token* tok = this->look;
         this->move();
         arith = new Arith((Word*)tok, arith, this->term());
@@ -72,32 +202,93 @@ Arith* Parser::expr() {
 }
 Arith* Parser::term() {
     Arith* arith = (Arith*)this->unary();
-    while (this->look->getTag() == (int)"*" || 
-            this->look->getTag() == (int)"/") {
+    while (this->look->getTag() == '*' || 
+            this->look->getTag() == '/') {
         Token* tok = this->look;
         this->move();
         arith = new Arith((Word*)tok, arith, this->unary());
     }
     return arith;
 }
-Logical* Parser::unary() {
-
+Expr* Parser::unary() {
+    if(this->look->getTag() == '=') {
+        this->move();
+        return new Unary(Words.minus, this->unary());
+    }
+    else if(this->look->getTag() == '!') {
+        Token* tok = this->look;
+        this->move();
+        return new Not((Word*)tok, this->unary());
+    }
+    else {
+        return (Expr*)this->factor();
+    }
+    return nullptr;
 }
 Node* Parser::factor() {
-
+    Node* x = nullptr;
+    if(this->look->getTag() == '(') {
+        this->move();
+        x = this->_bool();
+        this->match(')');
+    }
+    else if(this->look->getTag() == Tags::NUM) {
+        x = new Constant(this->look, Types.Int);
+        Expr* e = (Expr*)x;
+        e->getOp()->setClazz(Clazz::NUM);
+        this->move();
+    }
+    else if(this->look->getTag() == Tags::REAL) {
+        x = new Constant(this->look, Types.Float);
+        this->move();
+    }
+    else if(this->look->getTag() == Tags::TRUE) {
+        x = Constants.True;
+        this->move();
+    }
+    else if(this->look->getTag() == Tags::FALSE) {
+        x = Constants.False;
+        this->move();
+    }
+    else if (this->look->getTag() == Tags::ID) {
+        Id* id = (Id*)this->top->get(this->look);
+        if(id == nullptr) {
+            this->error(this->look->toString() + " undeclared");
+        }
+        this->move();
+        if(this->look->getTag() != '[') {
+            return id;
+        }
+        else{
+            return this->offset(id);
+        }
+    }
+    return x;
 }
 Access* Parser::offset(Id* id) {
-    # if TODO
-    Array* _type = id->getType();
-    this->match((int)"[");
-    Logical* i = this->_bool();
-    this->match((int)"]");
-    _type = _type->of;
-    #endif
+    Array* _type = (Array*)id->getType();
+    this->match('[');
+    Node* i = this->_bool();
+    this->match(']');
+    _type = _type->getOf();
+    Constant* w = new Constant(_type->getWidth());
+    Arith* t1   = new Arith((Word*)new Token('*'), (Expr*)i, (Expr*)w);
+    Arith* loc  = t1;
+    while(this->look->getTag() == '[') {
+        this->match('[');
+        i = this->_bool();
+        this->match(']');
+        _type = _type->getOf();
+        w = new Constant(_type->getWidth());
+        t1 = new Arith((Word*)new Token('*'), (Expr*)i, (Expr*)w);
+        Arith* t2 = new Arith((Word*)new Token('+'), (Expr*)loc, (Expr*)t1);
+        loc = t2;
+    }
+    return new Access((Array*)id, loc, _type);
 }
 
 void Parser::program() {
-    Stmt* s = this->block();
+    Seq* s = this->block();
     int begin = s->newlable();
     int after = s->newlable();
     s->emitlabel(begin);

@@ -39,7 +39,7 @@ private:
 public:
     Arith(){}
     ~Arith(){}
-    Arith(Word* tok, Expr* x1, Expr* x2) : Op(tok, nullptr) {
+    Arith(Token* tok, Expr* x1, Expr* x2) : Op(tok, nullptr) {
         this->expr1 = x1;
         this->expr2 = x2;
         this->type = Type::max(this->expr1->getType(), this->expr2->getType());

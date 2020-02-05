@@ -1,11 +1,14 @@
 // Copyright (c) ssj. All rights reserved.
 
+#pragma once
+
 #include "lexer.h"
+#include "symbol.h"
 
 #include <iostream>
 
 class Node {
-private:
+protected:
     int labels;
     int lexline;
 public:
@@ -43,19 +46,18 @@ public:
     Stmt* Null = new Stmt();
     Stmt* Enclosing = Null;
 };
-STMTS Stmts;
 
 class Expr : public Node {
 protected:
-    Word* op;
+    Token* op;
     Type* type;
 public:
     Expr(){}
-    Expr(Word* tok, Type* type) : op(tok), type(type) {}
+    Expr(Token* tok, Type* _type) : op(tok), type(_type) {}
     Type* getType() const{
         return this->type;
     }
-    Token* getWord() const{
+    Token* getOp() const{
         return this->op;
     }
     Expr* gen() {
@@ -65,7 +67,16 @@ public:
         return this;
     }
     std::string toString() const{
-        return this->op->toString();
+        if(this->op->getClazz() == Clazz::NUM) {
+            Number* n = (Number*)this->op;
+            return n->toString();
+        }
+        else if(this->op->getClazz() == Clazz::WORD) {
+            Word* w = (Word*)this->op;
+            return w->toString();
+        }
+        Word* w = (Word*)this->op;
+        return w->toString();
     }
     void emitjumps(std::string str, int t, int f) {
         if (t != 0 && f != 0) {
@@ -90,10 +101,7 @@ private:
 public:
     static int count;
     Temp(){}
-    Temp(Type* type) : Expr(Words.temp, type) {
-        count++;
-        this->number = count;
-    }
+    Temp(Type* _type);
     std::string toString() const{
         return "t" + std::to_string(number);
     }
@@ -146,7 +154,7 @@ class Op : public Expr {
 public:
     Op(){}
     ~Op(){}
-    Op(Word* op, Type* type) : Expr(op, type) {}
+    Op(Token* op, Type* type) : Expr(op, type) {}
     Temp* reduce() {
         Expr* x = this->gen();
         Temp* t = new Temp(this->type);
@@ -161,7 +169,9 @@ private:
 public:
     Id(){}
     ~Id(){}
-    Id(Word* tok, Type* type, int b) : offset(b), Expr(tok, type) {}
+    Id(Word* tok, Type* type, int b) : offset(b), Expr(tok, type) {
+        this->getOp()->setClazz(Clazz::WORD);
+    }
 };
 
 class Unary : public Expr {
@@ -171,14 +181,7 @@ private:
 public:
     Unary(){}
     ~Unary(){}
-    Unary(Word* tok, Expr* x) : Expr(tok, nullptr) {
-        this->expr = x;
-        this->type = Type::max(Types.Int, this->expr->getType());
-        if (this->type == nullptr) {
-            std::cout << "type error" << std::endl;
-            exit(0);
-        }
-    }
+    Unary(Token* tok, Expr* x);
     Unary* gen() {
         return new Unary(this->op, this->expr->reduce());
     }
@@ -191,12 +194,13 @@ class Constant : public Expr {
 public:
     Constant(){}
     ~Constant(){}
-    Constant(Word* tok, Type* type) : Expr(tok, type) {}
+    Constant(int tok, Type* type=nullptr) : Expr((Word*)new Number(tok), type) {}
+    Constant(Token* tok, Type* type=nullptr) : Expr(tok, type) {}
     void jumping(int t, int f) {
-        if (!t && !this->getWord()->toString().compare("true")) {
+        if (!t && !this->getOp()->toString().compare("true")) {
             this->emit("goto L" + std::to_string(t));
         }
-        else if (!f && !this->getWord()->toString().compare("false")) {
+        else if (!f && !this->getOp()->toString().compare("false")) {
             this->emit("goto L" + std::to_string(f));
         }
     }
@@ -204,6 +208,12 @@ public:
 
 class CONSTANTS {
 public:
-    Constant* True  = new Constant(Words.True,  Types.Bool);
-    Constant* False = new Constant(Words.False, Types.Bool);
-}Constants;
+    CONSTANTS();
+    Constant* True;
+    Constant* False;
+};
+
+extern TYPES Types;
+extern WORDS Words;
+extern STMTS Stmts;
+extern CONSTANTS Constants;

@@ -28,9 +28,18 @@ public:
     static const int WHILE = 275;
 };
 
+class Clazz {
+public:
+    static const int TOKEN = 0;
+    static const int NUM   = 1;
+    static const int REAL  = 2;
+    static const int WORD  = 3;
+};
+
 class Token {
 private:
     int tag;
+    int clazz;
 public:
     Token(){}
     ~Token(){}
@@ -39,6 +48,13 @@ public:
     }
     int getTag() const{
         return this->tag;
+    }
+    int getClazz() const{
+        return this->clazz;
+    }
+    void setClazz(int c) {
+        this->clazz = c;
+        return;
     }
     std::string toString() const{
         return std::to_string(this->tag);
@@ -108,4 +124,4 @@ public:
     Word* True  = new Word("true", Tags::TRUE);
     Word* False = new Word("false", Tags::FALSE);
     Word* temp  = new Word("t", Tags::TEMP);
-}Words;
+};

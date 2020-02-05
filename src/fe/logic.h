@@ -4,13 +4,15 @@
 
 #include "inter.h"
 
+extern TYPES Types;
+
 class And : public Logical {
 public:
     And(){}
     ~And(){}
     And(Word* tok, Expr* x1, Expr* x2) : Logical(tok, x1, x2) {}
     void jumping(int t, int f) {
-        int label = f ? f : this->newlabel();
+        int label = f ? f : this->newlable();
         this->expr1->jumping(0, f);
         this->expr2->jumping(0, f);
         if (f == 0)
@@ -24,7 +26,7 @@ public:
     ~Or(){}
     Or(Word* tok, Expr* x1, Expr* x2) : Logical(tok, x1, x2) {}
     void jumping(int t, int f) {
-        int label = t ? t : this->newlabel();
+        int label = t ? t : this->newlable();
         this->expr1->jumping(label, 0);
         this->expr2->jumping(t, f);
         if (t == 0)
@@ -50,14 +52,7 @@ public:
     Rel(){}
     ~Rel(){}
     Rel(Word* tok, Expr* x1, Expr* x2) : Logical(tok, x1, x2) {}
-    Type* check(Type* p1, Type* p2) {
-        if (p1 == p2) {
-            return Types.Bool;
-        }
-        else {
-            return nullptr;
-        }
-    }
+    Type* check(Type* p1, Type* p2);
     void jumping(int t, int f) {
         Expr* a = this->expr1->reduce();
         Expr* b = this->expr2->reduce();
