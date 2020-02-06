@@ -8,9 +8,16 @@
 WORDS Words;
 TYPES Types;
 STMTS Stmts;
-CONSTANTS Constants;
+CONSTANTS Constants(new Constant(Words.True, Types.Bool),
+                    new Constant(Words.False, Types.Bool));
 
-int Temp::count = 0;
+int Temp::count  = 0;
+int Node::labels = 0;
+int Node::lexline = Lexer::line;
+
+int Node::newlable() {
+    return Node::labels++;
+}
 
 Unary::Unary(Token* tok, Expr* x) : Expr(tok, nullptr) {
     this->expr = x;
@@ -19,11 +26,6 @@ Unary::Unary(Token* tok, Expr* x) : Expr(tok, nullptr) {
         std::cout << "type error" << std::endl;
         exit(0);
     }
-}
-
-CONSTANTS::CONSTANTS() {
-    True  = new Constant(Words.True,  Types.Bool);
-    False = new Constant(Words.False, Types.Bool);
 }
 
 Temp::Temp(Type* _type) : Expr(Words.temp, _type) {

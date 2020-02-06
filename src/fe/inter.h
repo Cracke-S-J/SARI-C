@@ -7,15 +7,39 @@
 
 #include <iostream>
 
+class Inter{
+public:
+    static const int NODE = 0;
+    static const int STMT = 1;
+    static const int EXPR = 2;
+    static const int TMEP = 3;
+    static const int LOGC = 4;
+    static const int ID   = 5;
+    static const int OP   = 6;
+    static const int UNAR = 7;
+    static const int CONS = 8;
+    static const int SET  = 9;
+    static const int DO   = 10;
+    static const int WHIL = 11;
+    static const int BREA = 12;
+    static const int IF   = 13;
+    static const int ELSE = 14;
+    static const int SETE = 15;
+    static const int SEQ  = 16;
+    static const int ACCE = 17;
+    static const int ARIT = 18;
+    
+    
+};
+
 class Node {
 protected:
-    int labels;
-    int lexline;
+    static int labels;
+    static int lexline;
+    int clazz;
 public:
-    Node() : labels(0), lexline(Lexer::line) {}
-    int newlable() {
-        return this->labels++;
-    }
+    Node() {}
+    static int newlable();
     void emitlabel(int idx) {
         std::cout << "L" << std::to_string(idx) << ":";
     }
@@ -24,6 +48,13 @@ public:
     }
     void error(std::string str) {
         std::cout << "near line " << this->lexline << str << std::endl;
+    }
+    int getClazz() const{
+        return clazz;
+    }
+    void setClazz(int c) {
+        this->clazz = c;
+        return;
     }
 };
 
@@ -71,26 +102,31 @@ public:
             Number* n = (Number*)this->op;
             return n->toString();
         }
+        else if(this->op->getClazz() == Clazz::REAL) {
+            Real* r = (Real*)this->op;
+            return r->toString();
+        }
         else if(this->op->getClazz() == Clazz::WORD) {
             Word* w = (Word*)this->op;
             return w->toString();
         }
-        Word* w = (Word*)this->op;
-        return w->toString();
+        log_msg(this->op->toString());
+        return this->op->toString();
     }
     void emitjumps(std::string str, int t, int f) {
         if (t != 0 && f != 0) {
             this->emit("if " + str + " goto L" + std::to_string(t));
-            emit("goto L" + std::to_string(f));
+            this->emit("goto L" + std::to_string(f));
         }
         else if (t != 0) {
             this->emit("if " + str + " goto L" + std::to_string(t));
         }
         else if (f != 0) {
-            this->emit("iffalse" + str + " goto L" + std::to_string(t));
+            this->emit("iffalse " + str + " goto L" + std::to_string(f));
         }
     }
     void jumping(int t, int f) {
+        log_msg("jumping" + this->toString());
         this->emitjumps(this->toString(), t, f);
     }
 };
@@ -208,7 +244,10 @@ public:
 
 class CONSTANTS {
 public:
-    CONSTANTS();
+    CONSTANTS(Constant* a, Constant* b) {
+        this->True  = a;
+        this->False = b;
+    }
     Constant* True;
     Constant* False;
 };

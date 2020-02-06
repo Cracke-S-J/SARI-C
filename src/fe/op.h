@@ -35,7 +35,6 @@ class Arith : public Op {
 private:
     Expr* expr1;
     Expr* expr2;
-    Type* type;
 public:
     Arith(){}
     ~Arith(){}

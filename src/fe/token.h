@@ -3,6 +3,9 @@
 #pragma once
 
 #include <string>
+#include <sstream>
+
+#include "log.h"
 
 class Tags {
 public:
@@ -57,6 +60,11 @@ public:
         return;
     }
     std::string toString() const{
+        if(this->tag < 256) {
+            std::stringstream sstr;
+            sstr << (char)this->tag;
+            return sstr.str();
+        }
         return std::to_string(this->tag);
     }
 };

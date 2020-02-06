@@ -39,7 +39,9 @@ void* Lexer::scan() {
             this->readch();
         }
         if (this->peek != '.') {
-            return (Number*)new Number(tv);
+            Number* ret = new Number(tv);
+            ret->setClazz(Clazz::NUM);
+            return ret;
         }
         readch();
         float ftv = (float)tv;
@@ -49,7 +51,9 @@ void* Lexer::scan() {
             dv *= 10.0;
             this->readch();
         }
-        return (Real*)new Real(ftv);
+        Real* ret = new Real(ftv);
+        ret->setClazz(Clazz::REAL);
+        return ret;
     }
     if (isalpha(this->peek)) {
         std::string lexeme = "";
@@ -59,13 +63,16 @@ void* Lexer::scan() {
         }
         auto iter = this->words.find(lexeme);
         if (iter != this->words.end()) {
+            iter->second->setClazz(Clazz::WORD);
             return iter->second;
         }
         Word* word = new Word(lexeme, Tags::ID);
+        word->setClazz(Clazz::WORD);
         this->words.insert(std::map<std::string, Word*>::value_type(lexeme, word));
         return word;
     }
     Token* token = new Token(this->peek);
     this->peek = ' ';
+    token->setClazz(Clazz::TOKEN);
     return token;
 }

@@ -26,17 +26,11 @@ public:
     If(){}
     ~If(){}
     If(Expr* x, Stmt* s) : expr(x), stmt(s) {
-        if (!this->expr->getType()->toString().compare("bool")) {
+        if (!this->expr->getType()->isBool()) {
             this->expr->error("boolean required in if");
         }
     }
-    void gen(int b, int a) {
-        int label = this->newlable();
-        this->expr->jumping(0, a);
-        this->emitlabel(label);
-        this->stmt->gen(label, a);
-        return;
-    }
+    void gen(int b, int a);
 };
 
 class Else : public Stmt {
@@ -131,10 +125,14 @@ public:
     Set(Id* i, Expr* x) : id(i), expr(x) {
         if (!this->check(this->id->getType(), this->expr->getType())) {
             this->error("type error");
+            exit(0);
         }
     }
     Type* check(Type* p1, Type* p2) {
-        if (Type::numeric(p1) && Type::numeric(p2)) {
+        if(!p1 || !p2) {
+            return nullptr;
+        }
+        else if (Type::numeric(p1) && Type::numeric(p2)) {
             return p2;
         }
         else if (!p1->getLexeme().compare("bool") && 
@@ -147,8 +145,18 @@ public:
     }
     void gen(int b, int a) {
         log_msg(this->id->toString());
-        log_msg(this->expr->gen()->toString());
-        this->emit(this->id->toString() + " = " + this->expr->gen()->toString());
+        int expr_t = expr->getClazz();
+        if(expr_t == Inter::ARIT) {
+            Arith* arith = (Arith*)this->expr;
+            log_msg(arith->gen()->toString());
+            this->emit(this->id->toString() + " = " + 
+                       arith->gen()->toString());
+        }
+        else {
+            log_msg(this->expr->gen()->toString());
+            this->emit(this->id->toString() + " = " + 
+                       this->expr->gen()->toString());
+        }
     }
 };
 
@@ -185,14 +193,11 @@ public:
 
 class Seq : public Stmt {
 private:
-    Stmt* stmt1;
-    Stmt* stmt2;
-    Set*  set;
-    // Seq
+    Stmt* nxt;
+    Stmt* stmt;
 public:
     Seq(){}
     ~Seq(){}
-    Seq(Stmt* s1, Stmt* s2) : stmt1(s1), stmt2(s2), set(nullptr) {}
-    Seq(Stmt* s1, Set* s2) : stmt1(s1), set(s2), stmt2(nullptr) {}
+    Seq(Stmt* s1, Stmt* s2) : nxt(s1), stmt(s2) {}
     void gen(int b, int a);
 };

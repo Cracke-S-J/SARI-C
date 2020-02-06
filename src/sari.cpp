@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
         cout << "usage" << endl;
         return 0;
     }
+    log_msg("----------sari-start-----------");
     fstream fd;
     fd.open(argv[1], ios::in);
     Lexer* lexer  = new Lexer(fd);

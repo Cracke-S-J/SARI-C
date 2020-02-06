@@ -9,6 +9,7 @@
 #include <map>
 
 #include "token.h"
+#include "log.h"
 
 
 class Environ {

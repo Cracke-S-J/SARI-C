@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 class Parser {
 private:
@@ -21,8 +22,16 @@ private:
     Token* look;
     void move() {
         look = (Token*)lex->scan();
-        log_msg("look->tag = " + 
+        if(look->getTag() < 256) {
+            std::stringstream sstr;
+            sstr << (char)look->getTag();
+            log_msg("look->tag = " + sstr.str());
+        }
+        else {
+            log_msg("look->tag = " + 
                 std::to_string(look->getTag()));
+        }
+        
     }
     void error(std::string str) {
         std::cout << "near line " << std::to_string(lex->line) \
@@ -40,7 +49,7 @@ private:
     Array* dims(Array*);
     Seq* block();
     void decls();
-    Seq* stmts();
+    Stmt* stmts();
     void* stmt();
     Set* assign();
     Node* _bool();

@@ -6,18 +6,7 @@
 #include "inter.h"
 #include "log.h"
 
-Seq* Parser::block() {
-    log_msg("block start.");
-    this->match('{');
-    Environ* savedEnv = this->top;
-    this->top = new Environ(this->top);
-    this->decls();
-    Seq* s = this->stmts();
-    // this->match('}');
-    this->top = savedEnv;
-    log_msg("block finish.");
-    return s;
-}
+
 void Parser::decls() {
     log_msg("decl start.");
     while(this->look->getTag() == Tags::BASIC) {
@@ -43,6 +32,20 @@ Node* Parser::_type() {
         return (Node*)this->dims(tmp);
     }
 }
+
+Seq* Parser::block() {
+    log_msg("block start.");
+    this->match('{');
+    Environ* savedEnv = this->top;
+    this->top = new Environ(this->top);
+    this->decls();
+    Seq* s = (Seq*)this->stmts();
+    // this->match('}'); // TODO
+    this->top = savedEnv;
+    log_msg("block finish.");
+    return s;
+}
+
 Array* Parser::dims(Array* arr) {
     this->match('[');
     Number* tmp = (Number*)this->look;
@@ -56,14 +59,17 @@ Array* Parser::dims(Array* arr) {
     }
 }
 
-Seq* Parser::stmts() {
+Stmt* Parser::stmts() {
     log_msg("stmts start.");
     if (this->look->getTag() == '}') {
         log_msg("stmts end.");
+        Stmts.Null->setClazz(Inter::STMT);
         return (Seq*)Stmts.Null;
     }
     else {
-        return new Seq((Stmt*)this->stmts(), (Set*)this->stmt());
+        Seq* ret = new Seq((Stmt*)this->stmts(), (Stmt*)this->stmt());
+        ret->setClazz(Inter::SEQ);
+        return ret;
     }
 }
 
@@ -80,11 +86,15 @@ void* Parser::stmt() {
         this->match(')');
         Stmt* s1 = (Stmt*)this->stmt();
         if (this->look->getTag() != Tags::ELSE) {
-            return new If(x, s1);
+            If* ret = new If(x, s1);
+            ret->setClazz(Inter::IF);
+            return ret;
         }
         this->match(Tags::ELSE);
         Stmt* s2 = (Stmt*)this->stmt();
-        return new Else(x, s1, s2);
+        Else* ret = new Else(x, s1, s2);
+        ret->setClazz(Inter::ELSE);
+        return ret;
     }
     else if (this->look->getTag() == Tags::WHILE) {
         While* whilenode = new While();
@@ -140,16 +150,19 @@ Set* Parser::assign() {
     if(this->look->getTag() == '=') {
         this->move();
         set = new Set(id, (Expr*)this->_bool());
+        set->setClazz(Inter::SET);
     }
     else {
         Access* x = this->offset(id);
         this->match('=');
         set = (Set*)new SetElem(x, (Expr*)this->_bool());
+        set->setClazz(Inter::SETE);
     }
     this->match(';');
     log_msg("assign end.");
     return set;
 }
+
 Node* Parser::_bool() {
     Node* x = this->join();
     while (this->look->getTag() == Tags::OR) {
@@ -171,7 +184,7 @@ Node* Parser::join() {
 Node* Parser::equality() {
     Node* x = this->rel();
     while (this->look->getTag() == Tags::EQ ||
-        this->look->getTag() == Tags::NE) {
+           this->look->getTag() == Tags::NE) {
         Token* tok = this->look;
         this->move();
         x = new Rel((Word*)tok, (Arith*)x, this->expr());
@@ -191,13 +204,16 @@ Node* Parser::rel() {
     return x;
 }
 Arith* Parser::expr() {
+    log_msg("expr start.");
     Arith* arith = (Arith*)this->term();
     while (this->look->getTag() == '+' || 
            this->look->getTag() == '-') {
         Token* tok = this->look;
         this->move();
         arith = new Arith((Word*)tok, arith, this->term());
+        arith->setClazz(Inter::ARIT);
     }
+    log_msg("expr end.");
     return arith;
 }
 Arith* Parser::term() {
@@ -236,18 +252,24 @@ Node* Parser::factor() {
         x = new Constant(this->look, Types.Int);
         Expr* e = (Expr*)x;
         e->getOp()->setClazz(Clazz::NUM);
+        e->setClazz(Inter::CONS);
         this->move();
     }
     else if(this->look->getTag() == Tags::REAL) {
         x = new Constant(this->look, Types.Float);
+        Expr* e = (Expr*)x;
+        e->getOp()->setClazz(Clazz::REAL);
+        e->setClazz(Inter::CONS);
         this->move();
     }
     else if(this->look->getTag() == Tags::TRUE) {
         x = Constants.True;
+        Constants.True->setClazz(Inter::CONS);
         this->move();
     }
     else if(this->look->getTag() == Tags::FALSE) {
         x = Constants.False;
+        Constants.False->setClazz(Inter::CONS);
         this->move();
     }
     else if (this->look->getTag() == Tags::ID) {
@@ -257,6 +279,7 @@ Node* Parser::factor() {
         }
         this->move();
         if(this->look->getTag() != '[') {
+            id->setClazz(Inter::ID);
             return id;
         }
         else{

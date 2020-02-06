@@ -34,10 +34,13 @@ private:
     }
     void* gen_token(char ch, Word* word) {
         if (this->match(ch)) {
+            word->setClazz(Clazz::WORD);
             return word;
         }
         else {
-            return (Token*)new Token(ch);
+            Token* tok = new Token(ch);
+            tok->setClazz(Clazz::TOKEN);
+            return tok;
         }
     }
 
