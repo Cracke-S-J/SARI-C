@@ -42,20 +42,11 @@ public:
     Else(){}
     ~Else(){}
     Else(Expr* x, Stmt* s1, Stmt* s2) : expr(x), stmt1(s1), stmt2(s2) {
-        if (!this->expr->getType()->toString().compare("bool")) {
+        if (!this->expr->getType()->isBool()) {
             this->expr->error("boolean required in if");
         }
     }
-    void gen(int b, int a) {
-        int label1 = this->newlable();
-        int label2 = this->newlable();
-        this->expr->jumping(0, label2);
-        this->emitlabel(label1);
-        this->stmt1->gen(label1, a);
-        this->emit("goto L" + std::to_string(a));
-        this->emitlabel(label2);
-        this->stmt2->gen(label2, a);
-    }
+    void gen(int b, int a);
 };
 
 class Do : public Stmt {
@@ -66,24 +57,18 @@ public:
     Do() : expr(nullptr), stmt(nullptr) {}
     ~Do(){}
     Do(Expr* x, Stmt* s) : expr(x), stmt(s) {
-        if (!this->expr->getType()->toString().compare("bool")) {
+        if (!this->expr->getType()->isBool()) {
             this->expr->error("boolean required in do");
         }
     }
     void init(Expr* x, Stmt* s) {
         expr = x;
         stmt = s;
-        if (!this->expr->getType()->toString().compare("bool")) {
+        if (!this->expr->getType()->isBool()) {
             this->expr->error("boolean required in do");
         }
     }
-    void gen(int b, int a) {
-        this->setAfter(a);
-        int label = this->newlable();
-        this->stmt->gen(b, label);
-        this->emitlabel(label);
-        this->expr->jumping(b, 0);
-    }
+    void gen(int b, int a);
 };
 
 class While : public Stmt {
@@ -94,25 +79,18 @@ public:
     While() : expr(nullptr), stmt(nullptr) {}
     ~While(){}
     While(Expr* x, Stmt* s) : expr(x), stmt(s) {
-        if (!this->expr->getType()->toString().compare("bool")) {
-            this->expr->error("boolean required in do");
+        if (!this->expr->getType()->isBool()) {
+            this->expr->error("boolean required in while");
         }
     }
     void init(Expr* x, Stmt* s) {
         expr = x;
         stmt = s;
-        if (!this->expr->getType()->toString().compare("bool")) {
-            this->expr->error("boolean required in do");
+        if (!this->expr->getType()->isBool()) {
+            this->expr->error("boolean required in while");
         }
     }
-    void gen(int b, int a) {
-        this->setAfter(a);
-        this->expr->jumping(0, a);
-        int label = this->newlable();
-        this->emitlabel(label);
-        this->stmt->gen(label, a);
-        this->emit("goto L" + std::to_string(b));
-    }
+    void gen(int b, int a);
 };
 
 class Set : public Stmt {

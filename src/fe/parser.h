@@ -59,7 +59,7 @@ private:
     Arith* expr();
     Arith* term();
     Expr* unary();
-    Node* factor();
+    Expr* factor();
     Access* offset(Id*);
 
 public:

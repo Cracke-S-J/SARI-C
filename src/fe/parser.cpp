@@ -98,6 +98,7 @@ void* Parser::stmt() {
     }
     else if (this->look->getTag() == Tags::WHILE) {
         While* whilenode = new While();
+        whilenode->setClazz(Inter::WHIL);
         Stmt* saveStmt = (Stmt*)Stmts.Enclosing;
         Stmts.Enclosing = (Stmt*)whilenode;
         this->match(Tags::WHILE);
@@ -111,6 +112,7 @@ void* Parser::stmt() {
     }
     else if(this->look->getTag() == Tags::DO) {
         Do* donode = new Do();
+        donode->setClazz(Inter::DO);
         Stmt* savedStmt = Stmts.Enclosing;
         Stmts.Enclosing = donode;
         this->match(Tags::DO);
@@ -241,34 +243,34 @@ Expr* Parser::unary() {
     }
     return nullptr;
 }
-Node* Parser::factor() {
-    Node* x = nullptr;
+Expr* Parser::factor() {
+    Expr* x = nullptr;
     if(this->look->getTag() == '(') {
         this->move();
-        x = this->_bool();
+        x = (Expr*)this->_bool();
         this->match(')');
     }
     else if(this->look->getTag() == Tags::NUM) {
         x = new Constant(this->look, Types.Int);
-        Expr* e = (Expr*)x;
-        e->getOp()->setClazz(Clazz::NUM);
-        e->setClazz(Inter::CONS);
+        x->getOp()->setClazz(Clazz::NUM);
+        x->setClazz(Inter::CONS);
         this->move();
     }
     else if(this->look->getTag() == Tags::REAL) {
         x = new Constant(this->look, Types.Float);
-        Expr* e = (Expr*)x;
-        e->getOp()->setClazz(Clazz::REAL);
-        e->setClazz(Inter::CONS);
+        x->getOp()->setClazz(Clazz::REAL);
+        x->setClazz(Inter::CONS);
         this->move();
     }
     else if(this->look->getTag() == Tags::TRUE) {
         x = Constants.True;
+        x->getOp()->setClazz(Clazz::WORD);
         Constants.True->setClazz(Inter::CONS);
         this->move();
     }
     else if(this->look->getTag() == Tags::FALSE) {
         x = Constants.False;
+        x->getOp()->setClazz(Clazz::WORD);
         Constants.False->setClazz(Inter::CONS);
         this->move();
     }
