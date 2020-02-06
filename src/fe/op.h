@@ -41,16 +41,61 @@ public:
     Arith(Token* tok, Expr* x1, Expr* x2) : Op(tok, nullptr) {
         this->expr1 = x1;
         this->expr2 = x2;
-        this->type = Type::max(this->expr1->getType(), this->expr2->getType());
+        this->type = Type::max(this->expr1->getType(),
+                               this->expr2->getType());
         if (this->type == nullptr) {
             std::cout << "type error" << std::endl;
             exit(0);
         }
     }
     Arith* gen() {
-        return new Arith(this->op, this->expr1->reduce(), this->expr2->reduce());
+        if(this->expr1->getClazz() == Inter::ARIT &&
+           this->expr2->getClazz() == Inter::ARIT) {
+            Arith* arith = (Arith*)this->expr1;
+            Arith* arith2 = (Arith*)this->expr2;
+            return new Arith(this->op, arith->reduce(),
+                             arith2->reduce());
+        }
+        else if(this->expr1->getClazz() == Inter::ARIT) {
+            Arith* arith = (Arith*)this->expr1;
+            log_msg("expr1=arith, expr2=num");
+            return new Arith(this->op, arith->reduce(),
+                             this->expr2->reduce());
+        }
+        else if(this->expr2->getClazz() == Inter::ARIT) {
+            Arith* arith = (Arith*)this->expr2;
+            return new Arith(this->op, this->expr1->reduce(),
+                             arith->reduce());
+        }
+        else {
+            return new Arith(this->op, this->expr1->reduce(),
+                             this->expr2->reduce());
+        }
     }
     std::string toString() {
-        return this->expr1->toString() + " " + this->op->toString() + " " + this->expr2->toString();
+        if(this->expr1->getClazz() == Inter::TMEP) {
+            Temp* t  = (Temp*)this->expr1;
+            Temp* t2 = (Temp*)this->expr2;
+            return t->toString() + " " + \
+                    this->op->toString() + " " + \
+                    t2->toString();
+        }
+        else if(this->expr1->getClazz() == Inter::TMEP) {
+            Temp* t = (Temp*)this->expr1;
+            return t->toString() + " " + \
+                    this->op->toString() + " " + \
+                    this->expr2->toString();
+        }
+        else if(this->expr2->getClazz() == Inter::TMEP) {
+            Temp* t = (Temp*)this->expr1;
+            return this->expr1->toString() + " " + \
+                    this->op->toString() + " " + \
+                    t->toString();
+        }
+        else {
+            return this->expr1->toString() + " " + \
+                    this->op->toString() + " " + \
+                    this->expr2->toString();
+        }
     }
 };

@@ -194,6 +194,7 @@ public:
     Temp* reduce() {
         Expr* x = this->gen();
         Temp* t = new Temp(this->type);
+        t->setClazz(Inter::TMEP);
         this->emit(t->toString() + " = " + x->toString());
         return t;
     }

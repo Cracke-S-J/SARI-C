@@ -221,10 +221,11 @@ Arith* Parser::expr() {
 Arith* Parser::term() {
     Arith* arith = (Arith*)this->unary();
     while (this->look->getTag() == '*' || 
-            this->look->getTag() == '/') {
+           this->look->getTag() == '/') {
         Token* tok = this->look;
         this->move();
         arith = new Arith((Word*)tok, arith, this->unary());
+        arith->setClazz(Inter::ARIT);
     }
     return arith;
 }
