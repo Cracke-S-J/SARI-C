@@ -1,6 +1,7 @@
 // Copyright (c) ssj. All rights reserved.
 
 #include "stmt.h"
+#include "logic.h"
 
 Break::Break() {
     if (Stmts.Enclosing == nullptr) {
@@ -132,6 +133,11 @@ void If::gen(int b, int a) {
         Constant* cons = (Constant*)expr;
         log_msg("constant->jumping");
         cons->jumping(0, a);
+    }
+    else if(expr_t == Inter::REL) {
+        Rel* rel = (Rel*)expr;
+        log_msg("rel->jumping");
+        rel->jumping(0, a);
     }
     else {
         this->expr->jumping(0, a);

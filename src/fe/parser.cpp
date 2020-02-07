@@ -88,6 +88,7 @@ void* Parser::stmt() {
         if (this->look->getTag() != Tags::ELSE) {
             If* ret = new If(x, s1);
             ret->setClazz(Inter::IF);
+            log_msg("if ret");
             return ret;
         }
         this->match(Tags::ELSE);
@@ -188,8 +189,10 @@ Node* Parser::equality() {
     while (this->look->getTag() == Tags::EQ ||
            this->look->getTag() == Tags::NE) {
         Token* tok = this->look;
+        tok->setClazz(Clazz::WORD);
         this->move();
         x = new Rel((Word*)tok, (Arith*)x, this->expr());
+        x->setClazz(Inter::REL);
     }
     return x;
 }
@@ -200,8 +203,17 @@ Node* Parser::rel() {
         this->look->getTag() == Tags::GE ||
         this->look->getTag() == '>') {
         Token* tok = this->look;
+        if(tok->getTag() == Tags::LE ||
+            tok->getTag() == Tags::GE) {
+            tok->setClazz(Clazz::WORD);
+        }
+        else {
+            tok->setClazz(Clazz::TOKEN);
+        }
         this->move();
-        return new Rel((Word*)tok, x, this->expr());
+        Rel* rel = new Rel((Word*)tok, x, this->expr());
+        rel->setClazz(Inter::REL);
+        return rel;
     }
     return x;
 }

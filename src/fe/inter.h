@@ -28,6 +28,10 @@ public:
     static const int SEQ  = 16;
     static const int ACCE = 17;
     static const int ARIT = 18;
+    static const int AND  = 19;
+    static const int OR   = 20;
+    static const int NOT  = 21;
+    static const int REL  = 22;
     
     
 };
@@ -147,7 +151,7 @@ class Logical : public Expr {
 protected:
     Expr* expr1;
     Expr* expr2;
-    Type* type;
+    // Type* type.
     Type* check(Type* a, Type* b) {
         if (!a->getLexeme().compare("bool") &&
             !b->getLexeme().compare("bool")) {
@@ -162,11 +166,11 @@ public:
     Logical(Word* tok, Expr* x1, Expr* x2) : Expr(tok, nullptr) {
         this->expr1 = x1;
         this->expr2 = x2;
-        this->type  = this->check(x1->getType(), x2->getType());
-        if (this->type == nullptr) {
-            std::cout << "type error" << std::endl;
-            exit(0);
-        }
+        // this->type  = this->check(x1->getType(), x2->getType());
+        // if (this->type == nullptr) {
+        //     std::cout << "type error" << std::endl;
+        //     exit(0);
+        // }
     }
     std::string toString() const{
         return this->expr1->toString() + " " + this->op->toString() + " " + this->expr2->toString();
