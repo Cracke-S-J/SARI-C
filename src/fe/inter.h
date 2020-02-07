@@ -153,7 +153,7 @@ protected:
             !b->getLexeme().compare("bool")) {
             return new Type("bool", Tags::BASIC, 1);
         }
-        else{
+        else {
             return nullptr;
         }
     }

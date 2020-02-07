@@ -48,32 +48,57 @@ public:
             exit(0);
         }
     }
+    Temp* reduce(Arith* self) {
+        log_msg("arith->reduce()");
+        Arith* x = self->gen();
+        Temp* t = new Temp(this->type);
+        t->setClazz(Inter::TMEP);
+        this->emit(t->toString() + " = " + x->toString());
+        return t;
+    }
     Arith* gen() {
+        log_msg("arith->gen()");
         if(this->expr1->getClazz() == Inter::ARIT &&
            this->expr2->getClazz() == Inter::ARIT) {
+            log_msg("expr1=arith, expr2=arith");
             Arith* arith = (Arith*)this->expr1;
             Arith* arith2 = (Arith*)this->expr2;
-            return new Arith(this->op, arith->reduce(),
-                             arith2->reduce());
+            Arith* ret = new Arith(this->op,
+                                    arith->reduce(arith),
+                                    arith2->reduce(arith2));
+            ret->setClazz(Inter::ARIT);
+            return ret;
         }
         else if(this->expr1->getClazz() == Inter::ARIT) {
             Arith* arith = (Arith*)this->expr1;
             log_msg("expr1=arith, expr2=num");
-            return new Arith(this->op, arith->reduce(),
-                             this->expr2->reduce());
+            Arith* ret = new Arith(this->op,
+                                    arith->reduce(arith),
+                                    this->expr2->reduce());
+            ret->setClazz(Inter::ARIT);
+            return ret;
         }
         else if(this->expr2->getClazz() == Inter::ARIT) {
             Arith* arith = (Arith*)this->expr2;
-            return new Arith(this->op, this->expr1->reduce(),
-                             arith->reduce());
+            Arith* ret = new Arith(this->op,
+                                    this->expr1->reduce(),
+                                    arith->reduce(arith));
+            ret->setClazz(Inter::ARIT);
+            return ret;
         }
         else {
-            return new Arith(this->op, this->expr1->reduce(),
-                             this->expr2->reduce());
+            log_msg("expr1=num, expr2=num");
+            Arith* ret = new Arith(this->op,
+                                    this->expr1->reduce(),
+                                    this->expr2->reduce());
+            ret->setClazz(Inter::ARIT);
+            return ret;
         }
     }
     std::string toString() {
-        if(this->expr1->getClazz() == Inter::TMEP) {
+        if(this->expr1->getClazz() == Inter::TMEP &&
+           this->expr2->getClazz() == Inter::TMEP) {
+            log_msg("expr1 temp, expr2 temp");
             Temp* t  = (Temp*)this->expr1;
             Temp* t2 = (Temp*)this->expr2;
             return t->toString() + " " + \
@@ -81,18 +106,21 @@ public:
                     t2->toString();
         }
         else if(this->expr1->getClazz() == Inter::TMEP) {
+            log_msg("expr1 tmp, expr2 expr");
             Temp* t = (Temp*)this->expr1;
             return t->toString() + " " + \
                     this->op->toString() + " " + \
                     this->expr2->toString();
         }
         else if(this->expr2->getClazz() == Inter::TMEP) {
-            Temp* t = (Temp*)this->expr1;
+            log_msg("expr1 expr, expr2 tmp");
+            Temp* t = (Temp*)this->expr2;
             return this->expr1->toString() + " " + \
                     this->op->toString() + " " + \
                     t->toString();
         }
         else {
+            log_msg("expr expr");
             return this->expr1->toString() + " " + \
                     this->op->toString() + " " + \
                     this->expr2->toString();

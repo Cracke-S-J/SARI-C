@@ -122,11 +122,11 @@ public:
         }
     }
     void gen(int b, int a) {
-        log_msg(this->id->toString());
+        log_msg("set->gen()" + this->id->toString());
         int expr_t = expr->getClazz();
         if(expr_t == Inter::ARIT) {
             Arith* arith = (Arith*)this->expr;
-            log_msg(arith->gen()->toString());
+            // log_msg(arith->gen()->toString());
             this->emit(this->id->toString() + " = " + 
                        arith->gen()->toString());
         }
