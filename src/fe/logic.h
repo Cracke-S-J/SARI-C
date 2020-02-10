@@ -3,6 +3,7 @@
 #pragma once
 
 #include "inter.h"
+#include "op.h"
 
 extern TYPES Types;
 
@@ -49,35 +50,5 @@ public:
         log_msg("new rel end");
     }
     Type* check(Type* p1, Type* p2);
-    void jumping(int t, int f) {
-        int expr1_t = this->expr1->getClazz();
-        int expr2_t = this->expr2->getClazz();
-        int op_t    = this->op->getClazz();
-        std::string str1, str2, strop;
-        if(expr1_t == Inter::CONS) {
-            log_msg("constant->reduce->tostr");
-            Constant* cons = (Constant*)expr1;
-            str1 = cons->reduce()->toString();
-        }
-        else {
-            str1 = expr1->reduce()->toString();
-        }
-        if(expr2_t == Inter::CONS) {
-            log_msg("constant->reduce->tostr");
-            Constant* cons = (Constant*)expr2;
-            str2 = cons->reduce()->toString();
-        }
-        else {
-            str2 = expr2->reduce()->toString();
-        }
-        if(op_t == Clazz::WORD) {
-            Word* word = (Word*)op;
-            strop = word->toString();
-        }
-        else {
-            strop = this->op->toString();
-        }
-        this->emitjumps(str1 + strop + str2, t, f);
-        return;
-    }
+    void Rel::jumping(int t, int f);
 };
