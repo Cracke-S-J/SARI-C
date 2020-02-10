@@ -11,13 +11,7 @@ public:
     And(){}
     ~And(){}
     And(Word* tok, Expr* x1, Expr* x2) : Logical(tok, x1, x2) {}
-    void jumping(int t, int f) {
-        int label = f ? f : this->newlable();
-        this->expr1->jumping(0, f);
-        this->expr2->jumping(0, f);
-        if (f == 0)
-            this->emitlabel(label);
-    }
+    void jumping(int t, int f);
 };
 
 class Or : public Logical {
@@ -25,13 +19,7 @@ public:
     Or(){}
     ~Or(){}
     Or(Word* tok, Expr* x1, Expr* x2) : Logical(tok, x1, x2) {}
-    void jumping(int t, int f) {
-        int label = t ? t : this->newlable();
-        this->expr1->jumping(label, 0);
-        this->expr2->jumping(t, f);
-        if (t == 0)
-            this->emitlabel(label);
-    }
+    void jumping(int t, int f);
 };
 
 class Not : public Logical {

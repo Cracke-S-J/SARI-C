@@ -52,10 +52,10 @@ private:
     Stmt* stmts();
     void* stmt();
     Set* assign();
-    Node* _bool();
-    Node* join();
-    Node* equality();
-    Node* rel();
+    Expr* _bool();
+    Expr* join();
+    Expr* equality();
+    Expr* rel();
     Arith* expr();
     Arith* term();
     Expr* unary();

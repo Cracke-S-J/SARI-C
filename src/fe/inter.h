@@ -95,6 +95,9 @@ public:
     Token* getOp() const{
         return this->op;
     }
+    void setType(Type* type) {
+        this->type = type;
+    }
     Expr* gen() {
         return this;
     }
@@ -153,8 +156,7 @@ protected:
     Expr* expr2;
     // Type* type.
     Type* check(Type* a, Type* b) {
-        if (!a->getLexeme().compare("bool") &&
-            !b->getLexeme().compare("bool")) {
+        if (a->isBool() && b->isBool()) {
             return new Type("bool", Tags::BASIC, 1);
         }
         else {
@@ -187,6 +189,12 @@ public:
         this->emit(tmp->toString() + " = false");
         this->emitlabel(a);
         return tmp;
+    }
+    Expr* getExpr1() const{
+        return this->expr1;
+    }
+    Expr* getExpr2() const{
+        return this->expr2;
     }
 };
 

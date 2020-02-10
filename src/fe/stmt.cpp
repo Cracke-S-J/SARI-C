@@ -139,6 +139,16 @@ void If::gen(int b, int a) {
         log_msg("rel->jumping");
         rel->jumping(0, a);
     }
+    else if(expr_t == Inter::AND) {
+        And* and = (And*)expr;
+        log_msg("and->jumping");
+        and->jumping(0, a);
+    }
+    else if(expr_t == Inter::OR) {
+        Or* or = (Or*)expr;
+        log_msg("or->jumping");
+        or->jumping(0, a);
+    }
     else {
         this->expr->jumping(0, a);
     }
@@ -166,6 +176,21 @@ void Else::gen(int b, int a) {
         Constant* cons = (Constant*)expr;
         log_msg("constant->jumping");
         cons->jumping(0, label2);
+    }
+    else if(expr_t == Inter::REL) {
+        Rel* rel = (Rel*)expr;
+        log_msg("rel->jumping");
+        rel->jumping(0, a);
+    }
+    else if(expr_t == Inter::AND) {
+        And* and = (And*)expr;
+        log_msg("and->jumping");
+        and->jumping(0, a);
+    }
+    else if(expr_t == Inter::OR) {
+        Or* or = (Or*)expr;
+        log_msg("or->jumping");
+        or->jumping(0, a);
     }
     else {
         this->expr->jumping(0, label2);
@@ -201,6 +226,21 @@ void While::gen(int b, int a) {
         Constant* cons = (Constant*)expr;
         log_msg("constant->jumping");
         cons->jumping(0, a);
+    }
+    else if(expr_t == Inter::REL) {
+        Rel* rel = (Rel*)expr;
+        log_msg("rel->jumping");
+        rel->jumping(0, a);
+    }
+    else if(expr_t == Inter::AND) {
+        And* and = (And*)expr;
+        log_msg("and->jumping");
+        and->jumping(0, a);
+    }
+    else if(expr_t == Inter::OR) {
+        Or* or = (Or*)expr;
+        log_msg("or->jumping");
+        or->jumping(0, a);
     }
     else {
         this->expr->jumping(0, a);
@@ -238,6 +278,21 @@ void Do::gen(int b, int a) {
         Constant* cons = (Constant*)expr;
         log_msg("constant->jumping");
         cons->jumping(b, 0);
+    }
+    else if(expr_t == Inter::REL) {
+        Rel* rel = (Rel*)expr;
+        log_msg("rel->jumping");
+        rel->jumping(0, a);
+    }
+    else if(expr_t == Inter::AND) {
+        And* and = (And*)expr;
+        log_msg("and->jumping");
+        and->jumping(0, a);
+    }
+    else if(expr_t == Inter::OR) {
+        Or* or = (Or*)expr;
+        log_msg("or->jumping");
+        or->jumping(0, a);
     }
     else {
         this->expr->jumping(b, 0);

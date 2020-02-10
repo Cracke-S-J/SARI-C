@@ -166,26 +166,39 @@ Set* Parser::assign() {
     return set;
 }
 
-Node* Parser::_bool() {
-    Node* x = this->join();
+Expr* Parser::_bool() {
+    Expr* x = this->join();
+    
     while (this->look->getTag() == Tags::OR) {
         Token* tok = this->look;
         this->move();
-        x = (Node*)new Or((Word*)tok, (Expr*)x, (Expr*)this->equality());
+        log_msg("new or");
+        Or* tmp = new Or((Word*)tok, (Expr*)x, (Expr*)this->join());
+        tmp->getExpr1()->setType(Types.Bool);
+        tmp->getExpr2()->setType(Types.Bool);
+        x = (Expr*)tmp;
+        x->setType(Types.Bool);
+        x->setClazz(Inter::OR);
+        log_msg("new or end");
     }
     return x;
 }
-Node* Parser::join() {
-    Node* x = this->equality();
+Expr* Parser::join() {
+    Expr* x = this->equality();
     while (this->look->getTag() == Tags::AND) {
         Token* tok = this->look;
         this->move();
-        x = (Node*)new And((Word*)tok, (Expr*)x, (Expr*)this->equality());
+        And* tmp = new And((Word*)tok, (Expr*)x, (Expr*)this->join());
+        tmp->getExpr1()->setType(Types.Bool);
+        tmp->getExpr2()->setType(Types.Bool);
+        x = (Expr*)tmp;
+        x->setType(Types.Bool);
+        x->setClazz(Inter::AND);
     }
     return x;
 }
-Node* Parser::equality() {
-    Node* x = this->rel();
+Expr* Parser::equality() {
+    Expr* x = this->rel();
     while (this->look->getTag() == Tags::EQ ||
            this->look->getTag() == Tags::NE) {
         Token* tok = this->look;
@@ -196,7 +209,7 @@ Node* Parser::equality() {
     }
     return x;
 }
-Node* Parser::rel() {
+Expr* Parser::rel() {
     Arith* x = this->expr();
     if (this->look->getTag() == '<' ||
         this->look->getTag() == Tags::LE ||
@@ -242,7 +255,7 @@ Arith* Parser::term() {
     return arith;
 }
 Expr* Parser::unary() {
-    if(this->look->getTag() == '=') {
+    if(this->look->getTag() == '-') {
         this->move();
         return new Unary(Words.minus, this->unary());
     }
