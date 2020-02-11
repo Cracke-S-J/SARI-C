@@ -218,6 +218,7 @@ Expr* Parser::rel() {
         Token* tok = this->look;
         if(tok->getTag() == Tags::LE ||
             tok->getTag() == Tags::GE) {
+            log_msg(">= or <=");
             tok->setClazz(Clazz::WORD);
         }
         else {

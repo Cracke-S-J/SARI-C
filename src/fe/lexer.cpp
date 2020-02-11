@@ -24,11 +24,11 @@ void* Lexer::scan() {
     case '=':
         return this->gen_token('=', Words.eq);
     case '!':
-        return this->gen_token('!', Words.eq);
+        return this->gen_token('=', Words.ne);
     case '<':
-        return this->gen_token('<', Words.eq);
+        return this->gen_token('=', Words.le);
     case '>':
-        return this->gen_token('>', Words.eq);
+        return this->gen_token('=', Words.ge);
     default:
         break;
     }
