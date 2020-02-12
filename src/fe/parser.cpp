@@ -168,7 +168,6 @@ Set* Parser::assign() {
 
 Expr* Parser::_bool() {
     Expr* x = this->join();
-    
     while (this->look->getTag() == Tags::OR) {
         Token* tok = this->look;
         this->move();

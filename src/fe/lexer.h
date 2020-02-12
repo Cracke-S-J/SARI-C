@@ -20,6 +20,7 @@ private:
     void readch() {
         stream_plain.get(this->peek);
         if(stream_plain.eof()) {
+            // TODO: eof 也支持预读一个，修完 gui 修这个.
             // log_msg("EOF");
             // exit(0);
         }
