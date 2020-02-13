@@ -40,7 +40,9 @@ Seq* Parser::block() {
     this->top = new Environ(this->top);
     this->decls();
     Seq* s = (Seq*)this->stmts();
-    // this->match('}'); // TODO
+    s->setClazz(Inter::SEQ);
+    log_msg("match '}'");
+    this->match('}'); // TODO
     this->top = savedEnv;
     log_msg("block finish.");
     return s;
@@ -130,7 +132,9 @@ void* Parser::stmt() {
     else if(this->look->getTag() == Tags::BREAK) {
         this->match(Tags::BREAK);
         this->match(';');
-        return new Break();
+        Break* _break = new Break();
+        _break->setClazz(Inter::BREA);
+        return _break;
     }
     else if(this->look->getTag() == '{') {
         return this->block();

@@ -14,15 +14,15 @@ private:
     std::fstream &stream_plain;
     std::map<std::string, Word*> words;
     char peek = ' ';
+    int is_eof;
     void reserve(Word* word) {
         this->words.insert(std::map<std::string, Word*>::value_type(word->getLexeme(), word));
     }
     void readch() {
         stream_plain.get(this->peek);
         if(stream_plain.eof()) {
-            // TODO: eof 也支持预读一个，修完 gui 修这个.
-            // log_msg("EOF");
-            // exit(0);
+            log_msg("EOF");
+            this->peek = -1;
         }
     }
     bool match(char ch) {
@@ -47,7 +47,7 @@ private:
 
 public:
     static int line;
-    Lexer(std::fstream &in_) : stream_plain(in_) {
+    Lexer(std::fstream &in_) : stream_plain(in_), is_eof(0) {
         this->reserve((Word*)new Word("if",    Tags::IF));
         this->reserve((Word*)new Word("else",  Tags::ELSE));
         this->reserve((Word*)new Word("while", Tags::WHILE));

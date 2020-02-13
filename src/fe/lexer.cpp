@@ -10,10 +10,15 @@ void* Lexer::scan() {
     while(true) {
         if (this->peek == ' ' || this->peek == '\t')
             ;
-        else if (this->peek == '\n')
+        else if (this->peek == '\n') {
             line++;
-        else
+        }
+        else if(this->peek == -1) {
             break;
+        }
+        else {
+            break;
+        }
         this->readch();
     }
     switch (this->peek) {

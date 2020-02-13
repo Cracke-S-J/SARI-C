@@ -40,6 +40,10 @@ private:
     void match(int t) {
         if(this->look->getTag() == t) {
             this->move();
+            if(this->look->getTag() == EOF) {
+                log_msg("return EOF");
+                return;
+            }
         }
         else {
             this->error("syntax error");

@@ -86,6 +86,10 @@ void Seq::gen(int b, int a) {
             Set* set = (Set*)stmt;
             set->gen(b, label);
         }
+        else if(stmt->getClazz() == Inter::SEQ) {
+            Seq* seq = (Seq*)stmt;
+            seq->gen(b, a);
+        }
         else if(stmt->getClazz() == Inter::IF) {
             If* _if = (If*)stmt;
             _if->gen(b, label);
@@ -157,6 +161,14 @@ void If::gen(int b, int a) {
         Set* set = (Set*)stmt;
         set->gen(label, a);
     }
+    else if(stmt->getClazz() == Inter::SEQ) {
+        Seq* seq = (Seq*)stmt;
+        seq->gen(label, a);
+    }
+    else if(stmt->getClazz() == Inter::BREA) {
+        Break* _break = (Break*)stmt;
+        _break->gen(label, a);
+    }
     else {
         this->stmt->gen(label, a);
     }
@@ -200,6 +212,14 @@ void Else::gen(int b, int a) {
         Set* set = (Set*)stmt1;
         set->gen(label1, a);
     }
+    else if(stmt1->getClazz() == Inter::SEQ) {
+        Seq* seq = (Seq*)stmt1;
+        seq->gen(label1, a);
+    }
+    else if(stmt1->getClazz() == Inter::BREA) {
+        Break* _break = (Break*)stmt1;
+        _break->gen(label1, a);
+    }
     else {
         this->stmt1->gen(label1, a);
     }
@@ -208,6 +228,14 @@ void Else::gen(int b, int a) {
     if(stmt2->getClazz() == Inter::SET) {
         Set* set = (Set*)stmt2;
         set->gen(label2, a);
+    }
+    else if(stmt2->getClazz() == Inter::SEQ) {
+        Seq* seq = (Seq*)stmt2;
+        seq->gen(label2, a);
+    }
+    else if(stmt2->getClazz() == Inter::BREA) {
+        Break* _break = (Break*)stmt2;
+        _break->gen(label2, a);
     }
     else {
         this->stmt2->gen(label2, a);
@@ -251,6 +279,14 @@ void While::gen(int b, int a) {
         Set* set = (Set*)stmt;
         set->gen(label, a);
     }
+    else if(stmt->getClazz() == Inter::SEQ) {
+        Seq* seq = (Seq*)stmt;
+        seq->gen(label, a);
+    }
+    else if(stmt->getClazz() == Inter::BREA) {
+        Break* _break = (Break*)stmt;
+        _break->gen(label, a);
+    }
     else {
         this->stmt->gen(label, a);
     }
@@ -263,6 +299,14 @@ void Do::gen(int b, int a) {
     if(stmt->getClazz() == Inter::SET) {
         Set* set = (Set*)stmt;
         set->gen(b, label);
+    }
+    else if(stmt->getClazz() == Inter::SEQ) {
+        Seq* seq = (Seq*)stmt;
+        seq->gen(label, a);
+    }
+    else if(stmt->getClazz() == Inter::BREA) {
+        Break* _break = (Break*)stmt;
+        _break->gen(label, a);
     }
     else {
         this->stmt->gen(b, label);
