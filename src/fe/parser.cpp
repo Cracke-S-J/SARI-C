@@ -42,7 +42,8 @@ Array* Parser::dims(Array* arr) {
         return this->dims(arr);
     }
     else {
-        return new Array(tmp->getNumber(), arr);
+        Array* array = new Array(tmp->getNumber(), arr);
+        return array;
     }
 }
 
@@ -325,6 +326,7 @@ Access* Parser::offset(Id* id) {
     this->match('[');
     Node* i = this->_bool();
     this->match(']');
+
     _type = _type->getOf();
     log_msg("1");
     Constant* w = new Constant(_type->getWidth());

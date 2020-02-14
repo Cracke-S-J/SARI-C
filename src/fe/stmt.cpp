@@ -22,6 +22,10 @@ void Seq::gen(int b, int a) {
             Seq* seq = (Seq*)stmt;
             seq->gen(b, a);
         }
+        else if(stmt->getClazz() == Inter::SETE) {
+            SetElem* sete = (SetElem*)stmt;
+            sete->gen(b, a);
+        }
         else if(stmt->getClazz() == Inter::IF) {
             If* _if = (If*)stmt;
             _if->gen(b, a);
@@ -56,6 +60,10 @@ void Seq::gen(int b, int a) {
             Seq* seq = (Seq*)nxt;
             seq->gen(b, a);
         }
+        else if(stmt->getClazz() == Inter::SEQ) {
+            Seq* seq = (Seq*)stmt;
+            seq->gen(b, a);
+        }
         else if(nxt->getClazz() == Inter::IF) {
             If* _if = (If*)nxt;
             _if->gen(b, a);
@@ -85,6 +93,10 @@ void Seq::gen(int b, int a) {
         if(stmt->getClazz() == Inter::SET) {
             Set* set = (Set*)stmt;
             set->gen(b, label);
+        }
+        else if(stmt->getClazz() == Inter::SEQ) {
+            Seq* seq = (Seq*)stmt;
+            seq->gen(b, a);
         }
         else if(stmt->getClazz() == Inter::SEQ) {
             Seq* seq = (Seq*)stmt;
