@@ -33,21 +33,6 @@ Node* Parser::_type() {
     }
 }
 
-Seq* Parser::block() {
-    log_msg("block start.");
-    this->match('{');
-    Environ* savedEnv = this->top;
-    this->top = new Environ(this->top);
-    this->decls();
-    Seq* s = (Seq*)this->stmts();
-    s->setClazz(Inter::SEQ);
-    log_msg("match '}'");
-    this->match('}'); // TODO
-    this->top = savedEnv;
-    log_msg("block finish.");
-    return s;
-}
-
 Array* Parser::dims(Array* arr) {
     this->match('[');
     Number* tmp = (Number*)this->look;
@@ -59,6 +44,20 @@ Array* Parser::dims(Array* arr) {
     else {
         return new Array(tmp->getNumber(), arr);
     }
+}
+
+Seq* Parser::block() {
+    log_msg("block start.");
+    this->match('{');
+    Environ* savedEnv = this->top;
+    this->top = new Environ(this->top);
+    this->decls();
+    Seq* s = (Seq*)this->stmts();
+    s->setClazz(Inter::SEQ);
+    this->match('}');
+    this->top = savedEnv;
+    log_msg("block finish.");
+    return s;
 }
 
 Stmt* Parser::stmts() {
@@ -321,11 +320,13 @@ Expr* Parser::factor() {
     return x;
 }
 Access* Parser::offset(Id* id) {
+    log_msg("offset start");
     Array* _type = (Array*)id->getType();
     this->match('[');
     Node* i = this->_bool();
     this->match(']');
     _type = _type->getOf();
+    log_msg("1");
     Constant* w = new Constant(_type->getWidth());
     Arith* t1   = new Arith((Word*)new Token('*'), (Expr*)i, (Expr*)w);
     Arith* loc  = t1;
@@ -339,11 +340,16 @@ Access* Parser::offset(Id* id) {
         Arith* t2 = new Arith((Word*)new Token('+'), (Expr*)loc, (Expr*)t1);
         loc = t2;
     }
+    log_msg("offset end");
     return new Access((Array*)id, loc, _type);
 }
 
 void Parser::program() {
     Seq* s = this->block();
+    Stmt* stmt = (Stmt*)s;
+    if(stmt == Stmts.Null) {
+        return;
+    }
     int begin = s->newlable();
     int after = s->newlable();
     s->emitlabel(begin);
