@@ -147,6 +147,7 @@ void* Parser::stmt() {
 Set* Parser::assign() {
     log_msg("assign start.");
     Token* t = this->look;
+    log_msg(t->toString());
     this->match(Tags::ID);
     Id* id = (Id*)this->top->get(t);
     log_msg("assign id: " + id->toString());
@@ -213,6 +214,7 @@ Expr* Parser::equality() {
     return x;
 }
 Expr* Parser::rel() {
+    log_msg("rel start.");
     Arith* x = this->expr();
     if (this->look->getTag() == '<' ||
         this->look->getTag() == Tags::LE ||
@@ -220,7 +222,7 @@ Expr* Parser::rel() {
         this->look->getTag() == '>') {
         Token* tok = this->look;
         if(tok->getTag() == Tags::LE ||
-            tok->getTag() == Tags::GE) {
+           tok->getTag() == Tags::GE) {
             log_msg(">= or <=");
             tok->setClazz(Clazz::WORD);
         }
@@ -285,6 +287,7 @@ Expr* Parser::factor() {
         x->getOp()->setClazz(Clazz::NUM);
         x->setClazz(Inter::CONS);
         this->move();
+        log_msg("fdslfkjslf" + this->look->toString());
     }
     else if(this->look->getTag() == Tags::REAL) {
         x = new Constant(this->look, Types.Float);
@@ -306,6 +309,7 @@ Expr* Parser::factor() {
     }
     else if (this->look->getTag() == Tags::ID) {
         Id* id = (Id*)this->top->get(this->look);
+        id->setClazz(Inter::ID);
         if(id == nullptr) {
             this->error(this->look->toString() + " undeclared");
         }

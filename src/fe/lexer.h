@@ -33,13 +33,13 @@ private:
         this->peek = ' ';
         return true;
     }
-    void* gen_token(char ch, Word* word) {
+    void* gen_token(char ori, char ch, Word* word) {
         if (this->match(ch)) {
             word->setClazz(Clazz::WORD);
             return word;
         }
         else {
-            Token* tok = new Token(ch);
+            Token* tok = new Token(ori);
             tok->setClazz(Clazz::TOKEN);
             return tok;
         }

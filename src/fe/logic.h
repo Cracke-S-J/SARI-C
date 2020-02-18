@@ -44,7 +44,7 @@ public:
         log_msg("new rel");
         this->type = this->check(x1->getType(), x2->getType());
         if (this->type == nullptr) {
-            std::cout << "type error" << std::endl;
+            // std::cout << "type error" << std::endl;
             // exit(0);
         }
         log_msg("new rel end");

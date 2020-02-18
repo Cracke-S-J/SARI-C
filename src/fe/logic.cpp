@@ -132,6 +132,10 @@ void Rel::jumping(int t, int f) {
         Arith* arith = (Arith*)expr1;
         str1 = arith->reduce(arith)->toString();
     }
+    else if(expr1_t == Inter::ID) {
+        Id* id = (Id*)expr1;
+        str1 = id->reduce()->toString();
+    }
     else {
         str1 = expr1->reduce()->toString();
     }
@@ -143,6 +147,10 @@ void Rel::jumping(int t, int f) {
     else if(expr2_t == Inter::ARIT) {
         Arith* arith = (Arith*)expr2;
         str2 = arith->reduce(arith)->toString();
+    }
+    else if(expr2_t == Inter::ID) {
+        Id* id = (Id*)expr2;
+        str2 = id->reduce()->toString();
     }
     else {
         str2 = expr2->reduce()->toString();

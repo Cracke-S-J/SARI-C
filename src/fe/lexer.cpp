@@ -23,17 +23,17 @@ void* Lexer::scan() {
     }
     switch (this->peek) {
     case '&':
-        return this->gen_token('&', Words.and);
+        return this->gen_token('&', '&', Words.and);
     case '|':
-        return this->gen_token('|', Words.or);
+        return this->gen_token('|', '|', Words.or);
     case '=':
-        return this->gen_token('=', Words.eq);
+        return this->gen_token('=', '=', Words.eq);
     case '!':
-        return this->gen_token('=', Words.ne);
+        return this->gen_token('!', '=', Words.ne);
     case '<':
-        return this->gen_token('=', Words.le);
+        return this->gen_token('<', '=', Words.le);
     case '>':
-        return this->gen_token('=', Words.ge);
+        return this->gen_token('>', '=', Words.ge);
     default:
         break;
     }
