@@ -26,9 +26,9 @@ public:
     If(){}
     ~If(){}
     If(Expr* x, Stmt* s) : expr(x), stmt(s) {
-        if (!this->expr->getType()->isBool()) {
-            this->expr->error("boolean required in if");
-        }
+        // if (!this->expr->getType()->isBool()) {
+        //     this->expr->error("boolean required in if");
+        // }
     }
     void gen(int b, int a);
 };
@@ -42,9 +42,9 @@ public:
     Else(){}
     ~Else(){}
     Else(Expr* x, Stmt* s1, Stmt* s2) : expr(x), stmt1(s1), stmt2(s2) {
-        if (!this->expr->getType()->isBool()) {
-            this->expr->error("boolean required in if");
-        }
+        // if (!this->expr->getType()->isBool()) {
+        //     this->expr->error("boolean required in if");
+        // }
     }
     void gen(int b, int a);
 };
@@ -57,16 +57,16 @@ public:
     Do() : expr(nullptr), stmt(nullptr) {}
     ~Do(){}
     Do(Expr* x, Stmt* s) : expr(x), stmt(s) {
-        if (!this->expr->getType()->isBool()) {
-            this->expr->error("boolean required in do");
-        }
+        // if (!this->expr->getType()->isBool()) {
+        //     this->expr->error("boolean required in do");
+        // }
     }
     void init(Expr* x, Stmt* s) {
         expr = x;
         stmt = s;
-        if (!this->expr->getType()->isBool()) {
-            this->expr->error("boolean required in do");
-        }
+        // if (!this->expr->getType()->isBool()) {
+        //     this->expr->error("boolean required in do");
+        // }
     }
     void gen(int b, int a);
 };
@@ -79,16 +79,16 @@ public:
     While() : expr(nullptr), stmt(nullptr) {}
     ~While(){}
     While(Expr* x, Stmt* s) : expr(x), stmt(s) {
-        if (!this->expr->getType()->isBool()) {
-            this->expr->error("boolean required in while");
-        }
+        // if (!this->expr->getType()->isBool()) {
+        //     this->expr->error("boolean required in while");
+        // }
     }
     void init(Expr* x, Stmt* s) {
         expr = x;
         stmt = s;
-        if (!this->expr->getType()->isBool()) {
-            this->expr->error("boolean required in while");
-        }
+        // if (!this->expr->getType()->isBool()) {
+        //     this->expr->error("boolean required in while");
+        // }
     }
     void gen(int b, int a);
 };

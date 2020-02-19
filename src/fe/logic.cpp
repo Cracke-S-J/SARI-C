@@ -81,18 +81,18 @@ void Or::jumping(int t, int f) {
     }
     else if(expr1_t == Inter::ID) {
         Id* id = (Id*)expr1;
-        id->jumping(0, f);
+        id->jumping(label, 0);
     }
     else if(expr1_t == Inter::ID) {
         Id* id = (Id*)expr1;
-        id->jumping(0, f);
+        id->jumping(label, 0);
     }
     else {
         this->expr1->jumping(label, 0);
     }
     if(expr2_t == Inter::OR) {
         Or* or = (Or*)expr2;
-        or->jumping(label, 0);
+        or->jumping(t, f);
     }
     else if(expr2_t == Inter::AND) {
         And* and = (And*)expr2;

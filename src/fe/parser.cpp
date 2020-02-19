@@ -358,6 +358,7 @@ void Parser::program() {
     }
     int begin = s->newlable();
     int after = s->newlable();
+    log_msg("emitlabel");
     s->emitlabel(begin);
     s->gen(begin, after);
     s->emitlabel(after);
